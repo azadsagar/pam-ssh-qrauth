@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "aws-sdk": "^2.1043.0",
+    "serverless-dotenv-plugin": "^3.10.0",
+    "serverless-websockets-plugin": "^1.0.0"
+  }
+}

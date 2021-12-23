@@ -1,0 +1,10 @@
+.vscode
+*.txt
+architecture.xml
+flow_diagram.xml
+config.h
+*.o
+*.so
+ws_client.c
+ws_client.h
+src/test-ws_client.c

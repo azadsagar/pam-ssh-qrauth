@@ -1,0 +1,12 @@
+# package directories
+node_modules
+jspm_packages
+
+# Serverless directories
+.serverless
+test.http
+package-lock.json
+yarn.lock
+layer/node_modules
+
+.env

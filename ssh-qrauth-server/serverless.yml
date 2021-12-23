@@ -1,0 +1,77 @@
+service: ssh-qrauth-server
+
+frameworkVersion: '2 || 3'
+
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  deploymentBucket:
+    name: ssh-qrapp-websocket-dev-serverlessdeploymentbucke-hbj713033l35
+  httpApi:
+    authorizers:
+      cognitoJWTAuth:
+        identitySource: $request.header.Authorization
+        issuerUrl: ${env:COGNITO_ISSUER}
+        audience:
+          - ${env:COGNITO_AUDIENCE}
+  region: ap-south-1
+  iam:
+    role:
+      statements:
+      - Effect: "Allow"
+        Action:
+          - "dynamodb:Query"
+          - "dynamodb:PutItem"
+          - "dynamodb:GetItem"
+        Resource:
+          - ${env:DYNAMO_DB_ARN}
+      - Effect: "Allow"
+        Action:
+          - "execute-api:Invoke"
+          - "execute-api:ManageConnections"
+        Resource:
+          - arn:aws:execute-api:ap-south-1:275829625285:nt6pybh1rc/*
+  environment:
+    REGION: ${env:REGION}
+    COGNITO_ISSUER: ${env:COGNITO_ISSUER}
+    DYNAMODB_TABLE: ${env:DYNAMODB_TABLE}
+    COGNITO_AUDIENCE: ${env:COGNITO_AUDIENCE}
+    POOLID: ${env:POOLID}
+    COGNITOIDP: ${env:COGNITOIDP}
+    WEBSOCKET_ENDPOINT: ${env:WEBSOCKET_ENDPOINT}
+
+package:
+  patterns:
+    - '!node_modules/**'
+    - handler.js
+    - '!package.json'
+    - '!package-lock.json'
+    - '!.env'
+    - '!test.http'
+
+plugins:
+  - serverless-deployment-bucket
+  - serverless-dotenv-plugin
+
+layers:
+  qrauthLibs:
+    path: layer
+    compatibleRuntimes:
+      - nodejs12.x
+
+functions:
+  sshauthqrcode:
+    handler: handler.authqrcode
+    memorySize: 256
+    timeout: 30
+    layers:
+      - {Ref: QrauthLibsLambdaLayer}
+    events:
+      - httpApi:
+          path: /v1/app/sshqrauth/qrauth
+          method: post
+          authorizer: 
+            name: cognitoJWTAuth

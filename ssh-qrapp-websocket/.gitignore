@@ -1,0 +1,5 @@
+node_modules
+layer/node_modules
+.serverless
+package-lock.json
+.env
